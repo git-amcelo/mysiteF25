@@ -38,6 +38,9 @@ class Book(models.Model):
 
 # c. Member Model
 class Member(User):
+    class Meta:
+        db_table = 'members'
+
     STATUS_CHOICES = [
         (1, 'Regular member'),
         (2, 'Premium Member'),
