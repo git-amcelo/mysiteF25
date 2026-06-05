@@ -1,0 +1,42 @@
+[
+  {
+    "model": "myapp.book",
+    "pk": 1,
+    "fields": { "title": "Machine Learning For Dummies", "category": "S", "num_pages": 464, "price": "34.99", "publisher": 1 }
+  },
+  {
+    "model": "myapp.book",
+    "pk": 2,
+    "fields": { "title": "Data Science For Dummies", "category": "S", "num_pages": 432, "price": "36.99", "publisher": 1 }
+  },
+  {
+    "model": "myapp.book",
+    "pk": 3,
+    "fields": { "title": "Artificial Intelligence", "category": "S", "num_pages": 1136, "price": "197.32", "publisher": 2 }
+  },
+  {
+    "model": "myapp.book",
+    "pk": 4,
+    "fields": { "title": "Computer Networking", "category": "S", "num_pages": 720, "price": "143.99", "publisher": 2 }
+  },
+  {
+    "model": "myapp.book",
+    "pk": 5,
+    "fields": { "title": "The Night Circus", "category": "F", "num_pages": 400, "price": "19.00", "publisher": 3 }
+  },
+  {
+    "model": "myapp.book",
+    "pk": 6,
+    "fields": { "title": "The Underground Railroad", "category": "F", "num_pages": 320, "price": "26.95", "publisher": 3 }
+  },
+  {
+    "model": "myapp.book",
+    "pk": 7,
+    "fields": { "title": "Becoming", "category": "B", "num_pages": 464, "price": "32.00", "publisher": 3 }
+  },
+  {
+    "model": "myapp.book",
+    "pk": 8,
+    "fields": { "title": "A Walk in the Woods", "category": "T", "num_pages": 304, "price": "19.00", "publisher": 3 }
+  }
+]
