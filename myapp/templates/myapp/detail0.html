@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Book Detail</title>
+</head>
+<body>
+
+    <h2>Book Details</h2>
+
+    {% if book %}
+        <p><strong>Title:</strong> {{ book.title }}</p>
+        <p><strong>Price:</strong> ${{ book.price }}</p>
+        <p><strong>Publisher:</strong> {{ book.publisher.name }}</p>
+    {% else %}
+        <p>Book not found!</p>
+    {% endif %}
+
+    <p><a href="{% url 'myapp:index' %}">Back to main page</a></p>
+
+</body>
+
+</html>

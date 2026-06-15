@@ -1,0 +1,18 @@
+{% extends 'myapp/base.html' %}
+
+{% block body_block %}
+    <h2>Book Details</h2>
+
+    {% if book %}
+        <p><strong>Title:</strong> {{ book.title }}</p>
+        <p><strong>Price:</strong> ${{ book.price }}</p>
+        <p><strong>Publisher:</strong> {{ book.publisher.name }}</p>
+        {% if book.description %}
+            <p><strong>Description:</strong> {{ book.description }}</p>
+        {% endif %}
+        <p><strong>Category:</strong> {{ book.get_category_display }}</p>
+        <p><strong>Pages:</strong> {{ book.num_pages }}</p>
+    {% else %}
+        <p>Book not found!</p>
+    {% endif %}
+{% endblock %}
