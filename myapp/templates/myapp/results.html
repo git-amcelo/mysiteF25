@@ -1,0 +1,20 @@
+{% extends 'myapp/base.html' %}
+
+{% block body_block %}
+    <h2>Hello {{ name|default:"Guest" }}</h2>
+    
+    {% if category %}
+        <p>Category Selected: {{ category }}</p>
+    {% else %}
+        <p>No specific category selected.</p>
+    {% endif %}
+
+    <h3>Available Books:</h3>
+    <ul>
+        {% for book in booklist %}
+            <li>{{ book.title }} - ${{ book.price }}</li>
+        {% empty %}
+            <li>No books found matching the criteria.</li>
+        {% endfor %}
+    </ul>
+{% endblock %}
