@@ -16,4 +16,6 @@
     {% else %}
         <strong>There are no available books!</strong>
     {% endif %}
+    <p><a href="{% url 'myapp:place_order' %}">Place an Order</a></p>
+    <p><a href="{% url 'myapp:review' %}">Review a Book</a></p>
 {% endblock %}

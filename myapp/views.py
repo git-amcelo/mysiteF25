@@ -1,8 +1,8 @@
 # Import necessary classes
 from django.http import HttpResponse
-from django.shortcuts import render, get_object_or_404
-from .models import Publisher, Book, Member, Order
-from .forms import FeedbackForm, SearchForm
+from django.shortcuts import render, get_object_or_404, redirect
+from .models import Publisher, Book, Member, Order, Review
+from .forms import FeedbackForm, SearchForm, OrderForm, ReviewForm
 
 # Create your views here.
 
@@ -30,12 +30,16 @@ def getFeedback(request):
     if request.method == 'POST':
         form = FeedbackForm(request.POST)
         if form.is_valid():
-            feedback = form.cleaned_data['feedback']
-            if feedback == 'B':
-                choice = ' to borrow books.'
-            elif feedback == 'P':
-                choice = ' to purchase books.'
-            else: 
+            feedbacks = form.cleaned_data['feedback']
+            choice_parts = []
+            if 'B' in feedbacks:
+                choice_parts.append('to borrow books')
+            if 'P' in feedbacks:
+                choice_parts.append('to purchase books')
+            
+            if choice_parts:
+                choice = ' ' + ' and '.join(choice_parts) + '.'
+            else:
                 choice = ' None.'
             return render(request, 'myapp/fb_results.html', {'choice':choice})
         else:
@@ -64,4 +68,50 @@ def findbooks(request):
     else:
         form = SearchForm()
         return render(request, 'myapp/findbooks.html', {'form': form})
+
+def place_order(request):
+    if request.method == 'POST':
+        form = OrderForm(request.POST)
+        if form.is_valid():
+            books = form.cleaned_data['books']
+            order = form.save(commit=False)
+            member = order.member
+            type = order.order_type
+            order.save()
+            form.save_m2m()
+            if type == 1:
+                for b in order.books.all():
+                    member.borrowed_books.add(b)
+            return render(request, 'myapp/order_response.html', {'books': books, 'order':order})
+        else:
+            return render(request, 'myapp/placeorder.html', {'form':form})
+    else:
+        form = OrderForm()
+        return render(request, 'myapp/placeorder.html', {'form':form})
+
+def review(request):
+    if request.method == 'POST':
+        form = ReviewForm(request.POST)
+        if form.is_valid():
+            rating = form.cleaned_data['rating']
+            if rating >= 1 and rating <= 5:
+                # new Review object is created based on the information submitted and stored in the db
+                review_obj = form.save()
+                # the num_reviews field of the specified book is incremented by 1 and the updated value is saved in the db.
+                book = review_obj.book
+                book.num_reviews += 1
+                book.save()
+                # the user is redirected to the main (index.html) page.
+                return redirect('myapp:index')
+            else:
+                # Redisplay the form with the message: ‘You must enter a rating between 1 and 5!’
+                return render(request, 'myapp/review.html', {
+                    'form': form,
+                    'error_message': 'You must enter a rating between 1 and 5!'
+                })
+        else:
+            return render(request, 'myapp/review.html', {'form': form})
+    else:
+        form = ReviewForm()
+        return render(request, 'myapp/review.html', {'form': form})
 
