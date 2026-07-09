@@ -95,16 +95,24 @@ def review(request):
         if form.is_valid():
             rating = form.cleaned_data['rating']
             if rating >= 1 and rating <= 5:
-                # new Review object is created based on the information submitted and stored in the db
-                review_obj = form.save()
-                # the num_reviews field of the specified book is incremented by 1 and the updated value is saved in the db.
-                book = review_obj.book
-                book.num_reviews += 1
-                book.save()
+                reviewer = form.cleaned_data['reviewer']
+                comments = form.cleaned_data.get('comments', '')
+                books = form.cleaned_data['book']
+                # Create a review for each selected book
+                for book in books:
+                    review_obj = Review.objects.create(
+                        reviewer=reviewer,
+                        book=book,
+                        rating=rating,
+                        comments=comments
+                    )
+                    # the num_reviews field of the specified book is incremented by 1 and the updated value is saved in the db.
+                    book.num_reviews += 1
+                    book.save()
                 # the user is redirected to the main (index.html) page.
                 return redirect('myapp:index')
             else:
-                # Redisplay the form with the message: ‘You must enter a rating between 1 and 5!’
+                # Redisplay the form with the message: 'You must enter a rating between 1 and 5!'
                 return render(request, 'myapp/review.html', {
                     'form': form,
                     'error_message': 'You must enter a rating between 1 and 5!'
@@ -114,4 +122,5 @@ def review(request):
     else:
         form = ReviewForm()
         return render(request, 'myapp/review.html', {'form': form})
+
 

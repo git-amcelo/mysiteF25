@@ -27,10 +27,18 @@ class OrderForm(forms.ModelForm):
         labels = {'member': u'Member name', }
 
 class ReviewForm(forms.ModelForm):
+    # Define book field separately for multiple selection
+    book = forms.ModelMultipleChoiceField(
+        queryset=Book.objects.all(),
+        widget=forms.CheckboxSelectMultiple(),
+        required=True,
+        label='Book'
+    )
+
     class Meta:
         model = Review
-        fields = ['reviewer', 'book', 'rating', 'comments']
-        widgets = {'book': forms.RadioSelect()}
+        # Exclude book from ModelForm processing since we handle it separately
+        fields = ['reviewer', 'rating', 'comments']
         labels = {
             'reviewer': 'Please enter a valid email',
             'rating': 'Rating: An integer between 1 (worst) and 5 (best)',
