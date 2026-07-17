@@ -1,8 +1,14 @@
 # Import necessary classes
 from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
+from django.urls import reverse
+from django.http import HttpResponseRedirect
 from .models import Publisher, Book, Member, Order, Review
 from .forms import FeedbackForm, SearchForm, OrderForm, ReviewForm
+import random
+from django.utils import timezone
 
 # Create your views here.
 
@@ -10,14 +16,90 @@ from .forms import FeedbackForm, SearchForm, OrderForm, ReviewForm
 def index(request):
     """Main landing page - shows list of books"""
     booklist = Book.objects.all().order_by('id')[:10]
-    return render(request, 'myapp/index.html', {'booklist': booklist})
-    # Passing context variable: booklist (list of books)
+    # Check if last_login exists in session
+    last_login = request.session.get('last_login', 'Your last login was more than one hour ago')
+    return render(request, 'myapp/index.html', {'booklist': booklist, 'last_login': last_login})
+    # Passing context variable: booklist (list of books), last_login (session value)
 
 
 def about(request):
     """About page for the eBook APP"""
-    return render(request, 'myapp/about.html')
-    # Passing context variables: NO - no extra context variables needed
+    # Check for 'lucky_num' cookie
+    lucky_num = request.COOKIES.get('lucky_num')
+    if lucky_num:
+        mynum = int(lucky_num)
+    else:
+        # Generate random number between 1 and 100
+        mynum = random.randint(1, 100)
+    response = render(request, 'myapp/about.html', {'mynum': mynum})
+    # Set cookie to expire after 5 minutes (300 seconds)
+    response.set_cookie('lucky_num', mynum, max_age=300)
+    return response
+    # Passing context variables: mynum (lucky number from cookie or randomly generated)
+
+
+def user_login(request):
+    """Handle user login"""
+    if request.method == 'POST':
+        username = request.POST['username']
+        password = request.POST['password']
+        user = authenticate(username=username, password=password)
+        if user:
+            if user.is_active:
+                login(request, user)
+                # Generate current date and time for session
+                last_login = timezone.now()
+                request.session['last_login'] = last_login.strftime('%Y-%m-%d %H:%M:%S')
+                # Set session expiry to 1 hour
+                request.session.set_expiry(10)
+                # Check for 'next' parameter to redirect after login
+                next_url = request.POST.get('next', '')
+                if next_url:
+                    return HttpResponseRedirect(next_url)
+                return HttpResponseRedirect(reverse('myapp:index'))
+            else:
+                return HttpResponse('Your account is disabled.')
+        else:
+            return HttpResponse('Invalid login details.')
+    else:
+        next_url = request.GET.get('next', '')
+        return render(request, 'myapp/login.html', {'next': next_url})
+
+
+@login_required
+def user_logout(request):
+    """Handle user logout"""
+    logout(request)
+    return HttpResponseRedirect(reverse('myapp:index'))
+
+
+@login_required
+def chk_reviews(request, book_id):
+    """Check reviews for a specific book - only for members"""
+    book = get_object_or_404(Book, pk=book_id)
+
+    # Check if user is a Member
+    if Member.objects.filter(username=request.user.username).exists():
+        # User is a Member - get average rating
+        reviews = Review.objects.filter(book=book)
+        if reviews.exists():
+            total_rating = sum(review.rating for review in reviews)
+            average_rating = total_rating / reviews.count()
+            return render(request, 'myapp/chk_reviews.html', {
+                'book': book,
+                'average_rating': average_rating,
+                'has_reviews': True
+            })
+        else:
+            return render(request, 'myapp/chk_reviews.html', {
+                'book': book,
+                'has_reviews': False
+            })
+    else:
+        # User is not a Member
+        return render(request, 'myapp/chk_reviews.html', {
+            'is_member': False
+        })
 
 
 def detail(request, book_id):
