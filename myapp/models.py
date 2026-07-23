@@ -41,6 +41,7 @@ class Book(models.Model):
 class Member(User):
     class Meta:
         db_table = 'members'
+        verbose_name = 'Member'
 
     STATUS_CHOICES = [
         (1, 'Regular member'),
